@@ -21,8 +21,35 @@ wildschwein_BE
 ```
 
 Task 2 : Getting an overview
+Calculate the time difference between subsequent rows
 
 ```{r}
-
+wildschwein <- mutate(wildschwein_BE,timelag = as.numeric(difftime(lead(DatetimeUTC),DatetimeUTC)), units = "sec")
+wildschwein
 ```
 
+
+```{r}
+wildschwein %>% group_by(TierID) %>% summarise(mean_timelag = mean(timelag,na.rm = T))
+```
+Creating visualisation plot : 
+
+```{r}
+ggplot(data = wildschwein_BE) +geom_point(mapping = aes(x = DatetimeUTC, y = TierID), color = "blue")
+```
+
+    How many individuals were tracked?
+    3
+
+    For how long were the individual tracked? Are there gaps?
+    002A : about 1 year
+    016A : a little bit less than 8 months
+    O18A : about 8 months
+    
+    Were all individuals tracked concurrently or sequentially?
+    concurrently
+    
+    What is the temporal sampling interval between the locations?
+    002A : 290 sec
+    016A : 2.5 sec
+    018A : 1600 sec
