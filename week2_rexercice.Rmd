@@ -53,3 +53,35 @@ ggplot(data = wildschwein_BE) +geom_point(mapping = aes(x = DatetimeUTC, y = Tie
     002A : 290 sec
     016A : 2.5 sec
     018A : 1600 sec
+
+
+Task 3 : Deriving movement parameters I: Speed
+
+```{r}
+E2 <- lead(wildschwein_BE$E, 1)
+N2 <- lead(wildschwein_BE$N, 1)
+steplength <- sqrt((wildschwein_BE$E - E2)^2 + (wildschwein_BE$N - N2)^2)
+wildschwein <- mutate(wildschwein_BE,timelag = as.numeric(difftime(lead(DatetimeUTC),DatetimeUTC)), units = "sec", steplength)
+wildschwein
+
+```
+
+Animals'speed : 
+
+the animal's speed is defined by the steplength by seconde
+
+in theory : steplength/timelag = m/s
+
+```{r}
+speed <- wildschwein$steplength/wildschwein$timelag
+wildschwein <- mutate(wildschwein_BE,timelag = as.numeric(difftime(lead(DatetimeUTC),DatetimeUTC)), units = "sec", steplength, speed)
+wildschwein
+```
+
+we want to now the mean speed per animal 
+
+```{r}
+wildschwein %>% group_by(TierID) %>% summarise(mean_speed = mean(speed,na.rm = T))
+```
+
+
