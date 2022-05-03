@@ -83,5 +83,127 @@ we want to now the mean speed per animal
 ```{r}
 wildschwein %>% group_by(TierID) %>% summarise(mean_speed = mean(speed,na.rm = T))
 ```
+Task 4 : Cross-scale movement analysis
 
+```{r}
+library(readr)
+caro <- read_csv("caro60.csv", col_types = cols(CollarID = col_number(), DatetimeUTC = col_datetime(format = "%Y-%m-%dT%H:%M:%SZ"), E = col_number(), N = col_number()))
+View(caro)
+nrow(caro)
+```
+
+The locations are stored in EPSG 2056
+
+```{r}
+caro_3 <- slice(caro, seq(from = 1, to = 200, by = 3))
+nrow(caro_3)
+```
+
+```{r}
+caro_6 <- slice(caro, seq(from = 1, to = 200, by = 6))
+nrow(caro_6)
+```
+
+```{r}
+caro_9 <- slice(caro, seq(from = 1, to = 200, by = 9))
+nrow(caro_9)
+```
+
+analyse of caro
+
+```{r}
+#timelag
+caro <- mutate(caro,timelag = as.numeric(difftime(lead(DatetimeUTC),DatetimeUTC)), units = "sec")
+#steplength
+E2 <- lead(caro$E, 1)
+N2 <- lead(caro$N, 1)
+steplength <- sqrt((caro$E - E2)^2 + (caro$N - N2)^2)
+caro <- mutate(caro, steplength)
+#speed
+speed <- caro$steplength/caro$timelag
+caro <- mutate(caro, speed)
+caro %>% summarise(mean_speed = mean(speed,na.rm = T))
+```
+
+analse of caro_3
+
+```{r}
+#timelag
+caro_3 <- mutate(caro_3,timelag = as.numeric(difftime(lead(DatetimeUTC),DatetimeUTC)), units = "sec")
+#steplength
+E2 <- lead(caro_3$E, 1)
+N2 <- lead(caro_3$N, 1)
+steplength <- sqrt((caro_3$E - E2)^2 + (caro_3$N - N2)^2)
+caro_3 <- mutate(caro_3, steplength)
+#speed
+speed <- caro_3$steplength/caro_3$timelag
+caro_3 <- mutate(caro_3, speed)
+caro_3 %>% summarise(mean_speed = mean(speed,na.rm = T))
+```
+
+analyse of caro_6
+
+```{r}
+#timelag
+caro_6 <- mutate(caro_6,timelag = as.numeric(difftime(lead(DatetimeUTC),DatetimeUTC)), units = "sec")
+#steplength
+E2 <- lead(caro_6$E, 1)
+N2 <- lead(caro_6$N, 1)
+steplength <- sqrt((caro_6$E - E2)^2 + (caro_6$N - N2)^2)
+caro_6 <- mutate(caro_6, steplength)
+#speed
+speed <- caro_6$steplength/caro_6$timelag
+caro_6 <- mutate(caro_6, speed)
+caro_6 %>% summarise(mean_speed = mean(speed,na.rm = T))
+```
+
+analyse of caro_9
+
+```{r}
+#timelag
+caro_9 <- mutate(caro_9,timelag = as.numeric(difftime(lead(DatetimeUTC),DatetimeUTC)), units = "sec")
+#steplength
+E2 <- lead(caro_9$E, 1)
+N2 <- lead(caro_9$N, 1)
+steplength <- sqrt((caro_9$E - E2)^2 + (caro_9$N - N2)^2)
+caro_9 <- mutate(caro_9, steplength)
+#speed
+speed <- caro_9$steplength/caro_9$timelag
+caro_9 <- mutate(caro_9, speed)
+caro_9 %>% summarise(mean_speed = mean(speed,na.rm = T))
+```
+```{r}
+View(caro_3)
+View(caro_6)
+View(caro_9)
+```
+
+comparing caro and caro_3 in a line plot
+
+```{r}
+ggplot() + geom_point(data = caro, mapping = aes (x = E, y = N), color = "blue") + geom_path(data = caro, mapping = aes (x = E, y = N), color = "blue") + geom_point(data= caro_3, mapping = aes (x = E, y =N), color = "red") + geom_path(data = caro_3, mapping = aes (x = E, y = N), color = "red") + ggtitle("Comparing original- with 3 minutes resampled data", subtitle = "Trajectory : Blue = 1 min, Red = 3 min") + theme(plot.title=element_text(hjust=0.5), plot.subtitle=element_text(hjust=0.5))
+```
+#Comment : I couldn't find out how to put the legends on the side. As a graph has to be understandable, i put a subtitle which explains the colors on the graph. 
+
+comparing caro and caro_6 in a line plot
+
+```{r}
+ggplot() + geom_point(data = caro, mapping = aes (x = E, y = N), color = "blue") + geom_path(data = caro, mapping = aes (x = E, y = N), color = "blue") + geom_point(data= caro_6, mapping = aes (x = E, y =N), color = "red") + geom_path(data = caro_6, mapping = aes (x = E, y = N), color = "red") + ggtitle("Comparing original- with 6 minutes resampled data", subtitle = "Trajectory : Blue = 1 min, Red = 6 min") + theme(plot.title=element_text(hjust=0.5), plot.subtitle=element_text(hjust=0.5))
+```
+
+
+comparing caro and caro_9 in a line plot
+
+```{r}
+ggplot() + geom_point(data = caro, mapping = aes (x = E, y = N), color = "blue") + geom_path(data = caro, mapping = aes (x = E, y = N), color = "blue") + geom_point(data= caro_9, mapping = aes (x = E, y =N), color = "red") + geom_path(data = caro_9, mapping = aes (x = E, y = N), color = "red") + ggtitle("Comparing original- with 9 minutes resampled data", subtitle = "Trajectory : Blue = 1 min, Red = 9 min") + theme(plot.title=element_text(hjust=0.5), plot.subtitle=element_text(hjust=0.5))
+```
+
+comparing derived speed at different sampling intervals
+
+```{r}
+ggplot() + geom_line(data = caro, mapping = aes(x = DatetimeUTC, y = speed), color = "blue") +geom_line(data = caro_3, mapping = aes(x = DatetimeUTC, y = speed), color = "red") + geom_line(data = caro_6, mapping = aes(x = DatetimeUTC, y = speed), color = "green") + geom_line(data = caro_9, mapping = aes(x = DatetimeUTC, y = speed), color = "orange")+ ggtitle("Comparing original- with 9 minutes resampled data", subtitle = "Blue : 1 min, Red : 3 min, Green : 6 min, Orange : 9 min") + theme(plot.title=element_text(hjust=0.5), plot.subtitle=element_text(hjust=0.5)) + labs (x = "Time", y = "Speed")
+```
+
+Interpret the line plot, what do the different lines for the different temporal granularities tell you? 
+- the bigger the intervall sampling, the smoother the speed.The 1 min intervall gives us more infos on the speed of the animal. Ex : at 9, the animal was maybe running away from som predator. At 10, it had to hurry for some reason, etc... the bigger the interval, the less exact information we have about its deplacements. 
 
